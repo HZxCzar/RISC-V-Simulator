@@ -1,12 +1,12 @@
 #include "unit/instruction_unit.h"
 // #include "../include/info/op_type.h"
-#include "utils/utils.h"
 #include "simulator.h"
+#include "utils/utils.h"
 
 namespace Czar {
 void DecodeLoad(WordType input_ins, InsType &ins) {
   int ins_type = input_ins >> 12 & 0b111;
-  ins.imm_ = input_ins >> 20 & 0b111111111111;
+  ins.imm_ = SignExtend(input_ins >> 20, 11);
   ins.rs1_ = input_ins >> 15 & 0b11111;
   ins.rd_ = input_ins >> 7 & 0b11111;
   if (ins_type == 0b000) {
@@ -163,7 +163,7 @@ void DecodeOther(WordType input_ins, InsType &ins) {
     ins.imm_ = SignExtend((input_ins >> 12) << 12, 31);
     ins.op_ = Op::LUI;
   } else {
-    std::cerr<<ins.ins_addr_<<' '<<ins_type<<'\n';
+    std::cerr << ins.ins_addr_ << ' ' << ins_type << '\n';
     throw("Invalid instruction type in DecodeOther");
   }
 }
@@ -211,16 +211,17 @@ void InstructionUnit::FetchDecode(State *current_state, State *next_state,
   }
   InsType ins;
   ins.ins_addr_ = current_state->pc_;
-  // std::cerr<<input_ins<<'\n';
-  if(input_ins==0x0ff00513)
-  {
-    next_state->stall_=true;
+  // if (ins.ins_addr_ == 4100) {
+  //   std::cerr << "at 4100\n";
+  // }
+  if (input_ins == 0x0ff00513) {
+    next_state->stall_ = true;
   }
   Decode(input_ins, ins);
   if (ins.op_type_ == OpType::BRANCH) {
     // predict
     bool flag = false;
-    ins.rd_=0;
+    ins.rd_ = 0;
     if (flag) {
       next_state->pc_ = current_state->pc_ + ins.imm_;
     } else {
@@ -233,8 +234,8 @@ void InstructionUnit::FetchDecode(State *current_state, State *next_state,
                 -1,           ins.rd_, static_cast<int>(current_state->pc_ + 4),
                 ins.ins_addr_};
   } else if (ins.op_ == Op::JALR) {
-    next_state->stall_=true;
-    next_state->help=current_state->help+1;
+    next_state->stall_ = true;
+    next_state->help = current_state->help + 1;
   } else if (ins.op_type_ == OpType::OTHER) {
     if (ins.op_ == Op::AUIPC) {
       ins.imm_ = current_state->pc_ + ins.imm_;
@@ -256,9 +257,9 @@ void InstructionUnit::Issue(State *current_state, State *next_state) {
   RobInfo rob_info{ins, ISSUE, current_state->rob_tail, ins.rd_};
   RssInfo rss_info{ins, current_state->rob_tail};
   if (ins.op_type_ == OpType::LOAD || ins.op_type_ == OpType::STORE) {
-    LsbInfo lsb_info{ins,current_state->rob_tail,-1};
-    if(ins.op_type_ == OpType::STORE){
-      rob_info.rd_ = ins.rs2_;//STORE存储rs2
+    LsbInfo lsb_info{ins, current_state->rob_tail, -1};
+    if (ins.op_type_ == OpType::STORE) {
+      rob_info.rd_ = ins.rs2_; // STORE存储rs2
     }
     if (current_state->register_file_.registers[ins.rs1_].dependency == -1) {
       rss_info.v1_ = current_state->register_file_.registers[ins.rs1_].value;
@@ -275,8 +276,7 @@ void InstructionUnit::Issue(State *current_state, State *next_state) {
       rss_info.q1_ =
           current_state->register_file_.registers[ins.rs1_].dependency;
     }
-    if(ins.op_ == Op::JALR)
-    {
+    if (ins.op_ == Op::JALR) {
       rss_info.imm_ = ins.imm_;
     }
     rss_info.imm_ = ins.imm_;
@@ -295,7 +295,8 @@ void InstructionUnit::Issue(State *current_state, State *next_state) {
     }
   }
   if (ins.op_type_ != OpType::BRANCH && ins.rd_ != -1) { //更新依赖
-    next_state->register_file_.registers[ins.rd_].dependency = current_state->rob_tail;
+    next_state->register_file_.registers[ins.rd_].dependency =
+        current_state->rob_tail;
   }
   instruction_queue.pop();
   next_state->rob_wire_ = {true, rob_info};

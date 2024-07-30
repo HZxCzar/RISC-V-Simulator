@@ -14,7 +14,6 @@ void ReorderBuffer::CDB() {
     if (cd_bus_->info.busy(pos) &&
         (cd_bus_->info[pos].type_ == BusType::WriteBack ||
          cd_bus_->info[pos].type_ == BusType::WriteDes)) {
-      std::cerr << cd_bus_->info[pos].pos_ << '\n';
       rob_info[cd_bus_->info[pos].pos_].value_ = cd_bus_->info[pos].data_;
       rob_info[cd_bus_->info[pos].pos_].state_ = RobState::WRITE;
     }
@@ -29,9 +28,6 @@ void ReorderBuffer::Flush(State *current_state) {
     return;
   }
   if (current_state->rob_wire_.first) {
-    if (current_state->rob_wire_.second.ins_.op_ == Op::JALR) {
-      std::cerr << "JALR get\n";
-    }
     rob_info.push(current_state->rob_wire_.second);
     current_state->rob_wire_.first = false;
   }
@@ -53,16 +49,10 @@ void ReorderBuffer::Flush(State *current_state) {
 
 void ReorderBuffer::Execute(State *current_state, State *next_state) {
   RobInfo &info = rob_info.front();
-  std::cerr << info.rob_pos_ << '\n';
-  std::cerr << rob_info.head() << "/" << rob_info.tail() << '\n';
+  // std::cerr << info.rob_pos_ << '\n';
+  // std::cerr << rob_info.head() << "/" << rob_info.tail() << '\n';
   if (rob_info.empty()) {
-    if (next_state->clean_) {
-      std::cerr << "clean\n";
-    }
     return;
-  }
-  if (info.ins_.ins_addr_ == 4096) {
-    std::cerr << "PrintInt\n";
   }
   if (info.state_ == RobState::ISSUE) {
     return;
@@ -74,7 +64,7 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
   }
   if (info.ins_.op_type_ == OpType::BRANCH) {
     if (info.rd_ != info.value_) {
-      std::cerr << "wrong predict, make it right next time!\n";
+      // std::cerr << "wrong predict, make it right next time!\n";
       next_state->clean_ = true;
       next_state->pc_ = info.value_ == 1 ? info.ins_.ins_addr_ + info.ins_.imm_
                                          : info.ins_.ins_addr_ + 4;
@@ -85,9 +75,6 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
   } else if (info.ins_.op_type_ == OpType::LOAD ||
              info.ins_.op_type_ == OpType::STORE) {
     if (info.state_ == RobState::WRITE) {
-      if (info.ins_.ins_addr_ == 4100) {
-        std::cerr << "EXEC 4100 LW\n";
-      }
       if (info.ins_.op_type_ == OpType::STORE) {
         int reg_pos = info.ins_.rs2_;
         // if (current_state->register_file_.registers[reg_pos].dependency !=
@@ -113,7 +100,7 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
     rob_info.pop();
     return;
   } else if (info.state_ == RobState::ISSUE) {
-    std::cerr << info.rob_pos_ << " not commit yet\n";
+    // std::cerr << info.rob_pos_ << " not commit yet\n";
     return;
   } else {
     if (info.state_ == RobState::COMMIT) {
@@ -125,28 +112,34 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
 
 void ReorderBuffer::Commit(State *current_state, State *next_state,
                            RobInfo &info) {
-  if (info.ins_.ins_addr_ == 4096) {
-    std::cerr << "commit 4096 LUI\n";
-  }
-  if (info.ins_.ins_addr_ == 4100) {
-    std::cerr << "commit 4100 LW\n";
-  }
-  if (info.ins_.ins_addr_ == 4104) {
-    std::cerr << "commit 4104 XOR\n";
-  }
-  if (info.ins_.ins_addr_ == 4108) {
-    std::cerr << "commit 4108 ADDI\n";
-  }
-  if (info.ins_.ins_addr_ == 4112) {
-    std::cerr << "commit 4112 SW\n";
-  }
+  // if(info.ins_.ins_addr_==4100){
+  //   std::cerr<<"commit 4100\n";
+  // }
+  // if(info.ins_.ins_addr_>=4236){
+  //   std::cerr<<"commit >=4236\n";
+  // }
+  // if(info.ins_.op_type_==OpType::BRANCH){
+  //   std::cerr<<"commit branch\n";
+  // }
+  // if (info.ins_.ins_addr_ == 4100) {
+  //   std::cerr << "at 4100\n";
+  // }
+  // if (info.ins_.ins_addr_ == 4112) {
+  //   std::cerr << "at 4112\n";
+  // }
+  // if (info.ins_.ins_addr_ == 4296) {
+  //   std::cerr << "sw A at 4296\n";
+  // }
+  // if (info.ins_.ins_addr_ == 4304) {
+  //   std::cerr << "sw b at 4304\n";
+  // }
   InsType &ins_ = info.ins_;
   // std::cerr << "ALU: " << info.rob_pos_ << ' ' << info.value_ << '\n';
   cd_bus_->info.push({BusType::WriteBack, info.rob_pos_, info.value_});
   if (ins_.op_type_ == OpType::STORE) {
     return;
   } else if (ins_.op_type_ == OpType::LOAD) {
-    if (current_state->register_file_.registers[info.rd_].dependency ==
+    if (next_state->register_file_.registers[info.rd_].dependency ==
         info.rob_pos_) {
       next_state->register_file_.registers[info.rd_].dependency = -1;
     }
@@ -155,7 +148,7 @@ void ReorderBuffer::Commit(State *current_state, State *next_state,
     return;
   } else if (ins_.op_type_ == OpType::ARITHI ||
              ins_.op_type_ == OpType::ARITHR) {
-    if (current_state->register_file_.registers[info.rd_].dependency ==
+    if (next_state->register_file_.registers[info.rd_].dependency ==
         info.rob_pos_) {
       next_state->register_file_.registers[info.rd_].dependency = -1;
     }
@@ -163,7 +156,7 @@ void ReorderBuffer::Commit(State *current_state, State *next_state,
     info.state_ = RobState::COMMIT;
     return;
   } else if (ins_.op_type_ == OpType::OTHER) {
-    if (current_state->register_file_.registers[info.rd_].dependency ==
+    if (next_state->register_file_.registers[info.rd_].dependency ==
         info.rob_pos_) {
       next_state->register_file_.registers[info.rd_].dependency = -1;
     }

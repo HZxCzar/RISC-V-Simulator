@@ -66,10 +66,10 @@ void ReservationStation::Execute(State *current_state, State *next_state) {
       rss_info.take_out(pos);
       return;
     }
-    else if(rss_info.busy(pos))
-    {
-      std::cerr<<"busy "<<rss_info[pos].rob_pos_<<' '<<rss_info[pos].q1_<<" "<<rss_info[pos].q2_<<'\n';
-    }
+    // else if(rss_info.busy(pos))
+    // {
+    //   std::cerr<<"busy "<<rss_info[pos].rob_pos_<<' '<<rss_info[pos].q1_<<" "<<rss_info[pos].q2_<<'\n';
+    // }
   }
 }
 

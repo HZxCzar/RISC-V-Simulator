@@ -38,9 +38,6 @@ void load_store_buffer::MEM() {
   if (mem_bus_->info.busy(0)) {
     if (mem_bus_->info[0].type_ == BusType::LoadFinish) {
       LsbInfo &info = lsb_info.front();
-      if (info.ins_.ins_addr_ == 4100) {
-        std::cerr << "load finish at 4100\n";
-      }
       info.value_ = mem_bus_->info[0].data_ + (mem_bus_->info[1].data_ << 8) +
                     (mem_bus_->info[2].data_ << 16) +
                     (mem_bus_->info[3].data_ << 24);
@@ -74,9 +71,6 @@ void load_store_buffer::Execute(State *current_state, State *next_state) {
         mem_bus_->info[0] = {LoadRequest, info.addr_, 4};
       }
     } else if (info.ins_.op_type_ == OpType::STORE) {
-      if (info.ins_.ins_addr_ == 4112) {
-        std::cerr << "store at 4112\n";
-      }
       int data = info.value_;
       if (info.ins_.op_ == Op::SB) {
         mem_bus_->info[0] = {StoreRequest, info.addr_, data & 0b11111111};

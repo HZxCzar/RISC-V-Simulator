@@ -13,7 +13,7 @@ public:
 private:
     void CDB();
     void Commit(State *current_state,State *next_state,RobInfo &info);
-    Queue<RobInfo,2> rob_info;
+    Queue<RobInfo,32> rob_info;
     Bus *cd_bus_;
 };
 }

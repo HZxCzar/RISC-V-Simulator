@@ -41,7 +41,7 @@ void ArithmeticLogicUnit::Execute(State *current_state, State *next_state)
         }else if(info.ins_.op_==Op::SLLI){
             ans=info.lhs_<<info.rhs_;
         }else if(info.ins_.op_==Op::SRLI){
-            ans=static_cast<unsigned int>(info.lhs_)>>info.rhs_;
+            ans=static_cast<int>(static_cast<unsigned int>(info.lhs_)>>static_cast<unsigned int>(info.rhs_));
         }else if(info.ins_.op_==Op::SRAI){
             ans=info.lhs_>>info.rhs_;
         }else{
@@ -62,7 +62,7 @@ void ArithmeticLogicUnit::Execute(State *current_state, State *next_state)
         }else if(info.ins_.op_==Op::XOR){
             ans=info.lhs_^info.rhs_;
         }else if(info.ins_.op_==Op::SRL){
-            ans=static_cast<unsigned int>(info.lhs_)>>info.rhs_;
+            ans=static_cast<int>(static_cast<unsigned int>(info.lhs_)>>static_cast<unsigned int>(info.rhs_));
         }else if(info.ins_.op_==Op::SRA){
             ans=info.lhs_>>info.rhs_;
         }else if(info.ins_.op_==Op::OR){
@@ -123,7 +123,7 @@ void ArithmeticLogicUnit::Execute(State *current_state, State *next_state)
     else{
         throw("Unknown op_type for ALU");
     }
-    std::cerr<<"ALU: "<<info.rob_pos_<<' '<<ans<<'\n';
+    // std::cerr<<"ALU: "<<info.rob_pos_<<' '<<ans<<'\n';
     if(info.ins_.op_type_==OpType::LOAD || info.ins_.op_type_==OpType::STORE)
     {
         cd_bus_->info.push({WriteDes,info.rob_pos_,ans});

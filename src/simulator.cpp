@@ -28,27 +28,15 @@ void Simulator::Init(AddrType pc) {
 int Simulator::Run() {
   try{
     while (true) {
-    std::cout<<"clock:"<<clock_<<'\n';
+    // std::cout<<"clock:"<<clock_<<'\n';
     Flush();
-    if(current_state_ && next_state_)
-    {
-      std::cerr<<"pc:"<<current_state_->pc_<<"/"<<next_state_->pc_<<'\n';
-      if(current_state_->pc_==4244)
-      {
-        std::cerr<<"at 4244\n";
-      }
-      if(current_state_->pc_==4260)
-      {
-        std::cerr<<"at 4260\n";
-      }
-      if(current_state_->pc_==4292)
-      {
-        std::cerr<<"at 4292\n";
-      }
-    }
+    // if(current_state_ && next_state_)
+    // {
+    //   std::cerr<<"pc:"<<current_state_->pc_<<"/"<<next_state_->pc_<<'\n';
+    // }
     if (current_state_->stop_) {
-      std::cout<<"stop at "<<current_state_->pc_<<std::endl;
-      std::cout<<"ans: "<<(current_state_->register_file_.registers[10].value & 255U)<<'\n';
+      // std::cout<<"stop at "<<current_state_->pc_<<std::endl;
+      // std::cout<<"ans: "<<(current_state_->register_file_.registers[10].value & 255U)<<'\n';
       return current_state_->register_file_.registers[10].value & 255U;
     }
     for (int i = 0; i <= 5; ++i) {
