@@ -9,7 +9,7 @@ int HexToInt(char insput_str) {
 }
 void MemoryUnit::init() {
   char input_str[10];
-  AddrType current_address = 0x0;
+  int current_address = 0x0;
   while (std::cin >> input_str) {
     if (input_str[0] == '@') {
       current_address = 0x0;
@@ -17,7 +17,7 @@ void MemoryUnit::init() {
         current_address = (current_address << 4) + HexToInt(input_str[i]);
       }
     } else {
-      ByteType current_data =
+      int current_data =
           (HexToInt(input_str[0]) << 4) + HexToInt(input_str[1]);
       memory_[current_address++] = current_data;
     }
@@ -25,16 +25,18 @@ void MemoryUnit::init() {
 }
 
 void MemoryUnit::Flush(State *current_state) {
+  // std::cerr<<"MemoryUnit::Flush\n";
   if (!current_state->stall_) {
     current_state->input_ins_ = memory_[current_state->pc_] +
                                 (memory_[current_state->pc_ + 1] << 8) +
                                 (memory_[current_state->pc_ + 2] << 16) +
                                 (memory_[current_state->pc_ + 3] << 24);
+    // std::cerr<<current_state->pc_<<" : "<<memory_[current_state->pc_]<<' '<<memory_[current_state->pc_+1]<<' '<<memory_[current_state->pc_+2]<<' '<<memory_[current_state->pc_+3]<<'\n';
   }
   if (wait_ == 0 && mem_bus_->info.busy(0) == true &&
-          (mem_bus_->info[0].type_ == LoadRequest) ||
-      mem_bus_->info[0].type_ == StoreRequest) {
-    wait_ = 5;
+          (mem_bus_->info[0].type_ == LoadRequest ||
+      mem_bus_->info[0].type_ == StoreRequest)) {
+    wait_ = 2;
   }
 }
 
@@ -63,8 +65,17 @@ void MemoryUnit::Execute(State *current_state, State *next_state) {
         mem_bus_->info[3] = {LoadFinish, 0, memory_[pos + 3]};
       }
     } else if (mem_bus_->info[0].type_ == StoreRequest) {
+      for(int i=0;i<4;++i)
+      {
+        if(mem_bus_->info.busy(i))
+        {
+          memory_[mem_bus_->info[i].pos_] = mem_bus_->info[i].data_;
+        }
+      }
       mem_bus_->info[0].type_ = StoreFinish;
-      memory_[mem_bus_->info[0].pos_] = mem_bus_->info[0].data_;
+      mem_bus_->info.busy(1)=false;
+      mem_bus_->info.busy(2)=false;
+      mem_bus_->info.busy(3)=false;
     }
   }
 }

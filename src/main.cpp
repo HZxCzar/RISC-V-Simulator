@@ -3,6 +3,6 @@ int main()
 {
     Czar::Simulator riskv_cpu;
     riskv_cpu.Init(0x0);
-    std::cout<<riskv_cpu.Run();
+    std::cout<<riskv_cpu.Run()<<'\n';
     return 0;
 }

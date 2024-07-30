@@ -71,11 +71,11 @@ struct InsType {
 enum RobState { ISSUE, WRITE, COMMIT , LSPREP }; //EXECUTE
 struct RobInfo{
   InsType ins_;
-  RobState state_;
+  RobState state_=ISSUE;
   int rob_pos_=0;
   int rd_=-1;
   int value_=0;//存储数据以及ls的地址
-  int sv_;//store_value
+  int sv_=0;//store_value
 };
 
 struct RssInfo{

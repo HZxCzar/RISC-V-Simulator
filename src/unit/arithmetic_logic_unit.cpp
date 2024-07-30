@@ -1,8 +1,11 @@
 #include "unit/arithmetic_logic_unit.h"
+#include "info/op_type.h"
 #include "simulator.h"
+#include "storage/bus.h"
 
 namespace Czar{
 void ArithmeticLogicUnit::Flush(State *current_state) {
+    // std::cerr<<"ArithmeticLogicUnit::Flush\n";
     if (current_state->clean_) {
         alu_info.clean();
         // current_state->alu_full_ = false;
@@ -19,7 +22,7 @@ void ArithmeticLogicUnit::Execute(State *current_state, State *next_state)
     if(!alu_info.busy(0)){
         return;
     }
-    AluInfo info=alu_info[0];
+    AluInfo &info=alu_info[0];
     alu_info.take_out(0);
     int ans;
     if(info.ins_.op_type_==OpType::ARITHI){
@@ -113,10 +116,22 @@ void ArithmeticLogicUnit::Execute(State *current_state, State *next_state)
             throw("Unknown op for ALU STORE");
         }
     }
+    else if(info.ins_.op_==Op::JALR)
+    {
+        ans=info.lhs_+info.rhs_;
+    }
     else{
         throw("Unknown op_type for ALU");
     }
-    cd_bus_->info.push({WriteBack,info.rob_pos_,ans});
+    std::cerr<<"ALU: "<<info.rob_pos_<<' '<<ans<<'\n';
+    if(info.ins_.op_type_==OpType::LOAD || info.ins_.op_type_==OpType::STORE)
+    {
+        cd_bus_->info.push({WriteDes,info.rob_pos_,ans});
+        return;
+    }
+    else{
+        cd_bus_->info.push({WriteBack,info.rob_pos_,ans});
+    }
 }
 
 } // namespace Czar

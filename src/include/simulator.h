@@ -41,6 +41,7 @@ struct State {
 
   int rob_tail=0;
   RegisterFile register_file_;
+  int help=0;
 };
 
 class Simulator {

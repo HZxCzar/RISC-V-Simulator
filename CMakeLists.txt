@@ -9,8 +9,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
-set(CMAKE_CXX_FLAGS "-Ofast")
+# set(CMAKE_CXX_FLAGS "-Ofast")
 
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -g")
+set(CMAKE_CXX_FLAGS "-Wall -fsanitize=address -fsanitize=undefined -fsanitize=leak -g -O0")
+
+set(CMAKE_BUILD_TYPE Debug)
 include_directories(src/include)
 
 add_subdirectory(src)

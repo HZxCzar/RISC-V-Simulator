@@ -120,9 +120,9 @@ void DecodeArithR(WordType input_ins, InsType &ins) {
 void DecodeBranch(WordType input_ins, InsType &ins) {
   int ins_type = input_ins >> 12 & 0b111;
   ins.imm_ = SignExtend(
-      (((input_ins >> 31 & 0b1) << 12) | ((input_ins >> 7 & 0b1111) << 11) |
+      (((input_ins >> 31 & 0b1) << 12) | ((input_ins >> 7 & 0b1) << 11) |
        ((input_ins >> 25 & 0b111111) << 5) | ((input_ins >> 8 & 0b1111) << 1)),
-      13);
+      12);
   ins.rs1_ = input_ins >> 15 & 0b11111;
   ins.rs2_ = input_ins >> 20 & 0b11111;
   if (ins_type == 0b000) {
@@ -159,10 +159,11 @@ void DecodeOther(WordType input_ins, InsType &ins) {
   } else if (ins_type == 0b0010111) {
     ins.imm_ = SignExtend((input_ins >> 12) << 12, 31);
     ins.op_ = Op::AUIPC;
-  } else if (ins_type == 0b011) {
+  } else if (ins_type == 0b0110111) {
     ins.imm_ = SignExtend((input_ins >> 12) << 12, 31);
     ins.op_ = Op::LUI;
   } else {
+    std::cerr<<ins.ins_addr_<<' '<<ins_type<<'\n';
     throw("Invalid instruction type in DecodeOther");
   }
 }
@@ -191,6 +192,7 @@ void Decode(WordType input_ins, InsType &ins) {
 }
 
 void InstructionUnit::Flush(State *current_state) {
+  // std::cerr<<"InstructionUnit::Flush\n";
   if (current_state->clean_) {
     instruction_queue.clean();
     current_state->ins_full_ = false;
@@ -209,10 +211,16 @@ void InstructionUnit::FetchDecode(State *current_state, State *next_state,
   }
   InsType ins;
   ins.ins_addr_ = current_state->pc_;
+  // std::cerr<<input_ins<<'\n';
+  if(input_ins==0x0ff00513)
+  {
+    next_state->stall_=true;
+  }
   Decode(input_ins, ins);
   if (ins.op_type_ == OpType::BRANCH) {
     // predict
     bool flag = false;
+    ins.rd_=0;
     if (flag) {
       next_state->pc_ = current_state->pc_ + ins.imm_;
     } else {
@@ -226,6 +234,7 @@ void InstructionUnit::FetchDecode(State *current_state, State *next_state,
                 ins.ins_addr_};
   } else if (ins.op_ == Op::JALR) {
     next_state->stall_=true;
+    next_state->help=current_state->help+1;
   } else if (ins.op_type_ == OpType::OTHER) {
     if (ins.op_ == Op::AUIPC) {
       ins.imm_ = current_state->pc_ + ins.imm_;
@@ -243,7 +252,7 @@ void InstructionUnit::Issue(State *current_state, State *next_state) {
       current_state->rss_full_ || current_state->lsb_full_) {
     return;
   }
-  InsType ins = instruction_queue.front();
+  InsType &ins = instruction_queue.front();
   RobInfo rob_info{ins, ISSUE, current_state->rob_tail, ins.rd_};
   RssInfo rss_info{ins, current_state->rob_tail};
   if (ins.op_type_ == OpType::LOAD || ins.op_type_ == OpType::STORE) {
@@ -258,12 +267,17 @@ void InstructionUnit::Issue(State *current_state, State *next_state) {
           current_state->register_file_.registers[ins.rs1_].dependency;
     }
     rss_info.imm_ = ins.imm_;
+    next_state->lsb_wire_ = {true, lsb_info};
   } else if (ins.op_type_ == OpType::ARITHI || ins.op_ == Op::JALR) {
     if (current_state->register_file_.registers[ins.rs1_].dependency == -1) {
       rss_info.v1_ = current_state->register_file_.registers[ins.rs1_].value;
     } else {
       rss_info.q1_ =
           current_state->register_file_.registers[ins.rs1_].dependency;
+    }
+    if(ins.op_ == Op::JALR)
+    {
+      rss_info.imm_ = ins.imm_;
     }
     rss_info.imm_ = ins.imm_;
   } else if (ins.op_type_ == OpType::ARITHR || ins.op_type_ == OpType::BRANCH) {

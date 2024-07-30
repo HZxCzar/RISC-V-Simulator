@@ -1,4 +1,5 @@
 #include "info/op_type.h"
+#include <iostream>
 
 namespace Czar {
 template <class T, int SIZE> class Queue {

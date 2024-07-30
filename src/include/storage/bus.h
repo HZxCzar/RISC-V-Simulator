@@ -10,6 +10,7 @@ namespace Czar
 
 enum BusType {
   WriteBack,
+  WriteDes,
   CommitReg,
   LoadFinish,
   StoreFinish,

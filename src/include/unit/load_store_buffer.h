@@ -9,6 +9,7 @@ public:
   load_store_buffer(Bus *mem_bus) : mem_bus_(mem_bus) {}
   void Flush(State *current_state);
   void Execute(State *current_state, State *next_state);
+  void Display(){};
 
 private:
   void MEM();

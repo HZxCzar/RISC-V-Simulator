@@ -11,9 +11,10 @@ class MemoryUnit:public BaseUnit {
   explicit MemoryUnit(Bus *mem_bus) : mem_bus_(mem_bus) {init();}
   void Flush(State *current_state);
   void Execute(State *current_state,State *next_state);
+  void Display(){};
   private:
   void init();
-  ByteType memory_[1024];
+  int memory_[1<<20];
   Bus *mem_bus_;
   int wait_{0};
 };

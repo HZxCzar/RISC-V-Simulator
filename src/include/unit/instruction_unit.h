@@ -10,6 +10,7 @@ namespace Czar {
         InstructionUnit():BaseUnit(){}
         void Flush(State *current_state);
         void Execute(State *current_state,State *next_state);
+        void Display(){};
         private:
         void FetchDecode(State *current_state, State *next_state, WordType input_ins);
         void Issue(State *current_state, State *next_state);

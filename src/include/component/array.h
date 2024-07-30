@@ -10,12 +10,19 @@ public:
     void push(T value){
         for(int i=0;i<size;i++){
             if(data[i].first==false){
-                data[pointer].second=value;
-                data[pointer].first=true;
+                data[i].second=value;
+                data[i].first=true;
+                ++pointer;
                 return;
             }
         }
-        throw ("full");
+        // if(pointer+1<size && data[pointer+1].first==false){
+        //     pointer++;
+        //     data[pointer].second=value;
+        //     data[pointer].first=true;
+        //     return;
+        // }
+        throw ("array full");
     }
     void pop(){
         if(pointer==-1){
@@ -33,13 +40,13 @@ public:
         return data[pos].second;
     }
     void clean() { 
-        for(int i=0;i<=pointer;i++){
+        for(int i=0;i<=size-1;i++){
             data[i].first=false;
         }
         pointer = -1; 
     }
-    void take_out(int pos) { data[pos].first = false; }
-    int get_pointer() { return pointer; }
+    void take_out(int pos) { data[pos].first = false; pointer--;}
+    // int get_pointer() { return pointer; }
     bool full() { return pointer == size - 1; }
 
 private:
