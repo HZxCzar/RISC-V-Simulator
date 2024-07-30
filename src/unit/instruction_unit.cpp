@@ -192,15 +192,14 @@ void Decode(WordType input_ins, InsType &ins) {
 }
 
 void InstructionUnit::Flush(State *current_state) {
-  // std::cerr<<"InstructionUnit::Flush\n";
   if (current_state->clean_) {
     instruction_queue.clean();
     current_state->ins_full_ = false;
   }
   if (current_state->ins_wire_.first) {
     instruction_queue.push(current_state->ins_wire_.second);
-    current_state->ins_full_ = instruction_queue.full();
   }
+  current_state->ins_full_ = instruction_queue.full();
 }
 
 void InstructionUnit::FetchDecode(State *current_state, State *next_state,
@@ -211,17 +210,15 @@ void InstructionUnit::FetchDecode(State *current_state, State *next_state,
   }
   InsType ins;
   ins.ins_addr_ = current_state->pc_;
-  // if (ins.ins_addr_ == 4100) {
-  //   std::cerr << "at 4100\n";
-  // }
+
   if (input_ins == 0x0ff00513) {
     next_state->stall_ = true;
   }
   Decode(input_ins, ins);
   if (ins.op_type_ == OpType::BRANCH) {
     // predict
-    bool flag = false;
-    ins.rd_ = 0;
+    bool flag = true;
+    ins.rd_ = 1;
     if (flag) {
       next_state->pc_ = current_state->pc_ + ins.imm_;
     } else {

@@ -11,6 +11,7 @@ public:
   }
   void push(T value) {
     if ((tail_ + 1) % size_ == head_) {
+      std::cerr << tail_ << ' ' << head_ << std::endl;
       throw("Queue is full");
     }
     data_[tail_] = value;

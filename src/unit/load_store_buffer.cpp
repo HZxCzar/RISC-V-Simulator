@@ -3,7 +3,6 @@
 #include "utils/utils.h"
 namespace Czar {
 void load_store_buffer::Flush(State *current_state) {
-  // std::cerr<<"load_store_buffer::Flush\n";
   if (current_state->clean_) {
     lsb_info.clean();
     current_state->lsb_full_ = false;

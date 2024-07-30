@@ -1,14 +1,14 @@
 #ifndef REGISTER_FILE_H
 #define REGISTER_FILE_H
-
 #include <cstdint>
+
 namespace Czar {
-struct Register{
-    int dependency=-1;
-    int value=0;
+struct Register {
+  int dependency = -1;
+  int value = 0;
 };
-struct RegisterFile{
-   Register registers[32]; 
+struct RegisterFile {
+  Register registers[32];
 };
-}
+} // namespace Czar
 #endif // REGISTER_FILE_H

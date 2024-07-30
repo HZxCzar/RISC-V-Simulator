@@ -1,3 +1,3 @@
-namespace Czar{
-    int SignExtend(int imm, int length);
+namespace Czar {
+int SignExtend(int imm, int length);
 }

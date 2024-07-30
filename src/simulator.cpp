@@ -1,11 +1,4 @@
 #include "simulator.h"
-// #include "include/info/op_type.h"
-// #include "include/unit/arithmetic_logic_unit.h"
-// #include "include/unit/instruction_unit.h"
-// #include "include/unit/load_store_buffer.h"
-// #include "include/unit/memory_unit.h"
-// #include "include/unit/reorder_buffer.h"
-// #include "include/unit/reservation_station.h"
 
 namespace Czar {
 Simulator::Simulator() {
@@ -26,25 +19,18 @@ void Simulator::Init(AddrType pc) {
   next_state_->pc_ = pc;
 }
 int Simulator::Run() {
-  try{
+  try {
     while (true) {
-    // std::cout<<"clock:"<<clock_<<'\n';
-    Flush();
-    // if(current_state_ && next_state_)
-    // {
-    //   std::cerr<<"pc:"<<current_state_->pc_<<"/"<<next_state_->pc_<<'\n';
-    // }
-    if (current_state_->stop_) {
-      // std::cout<<"stop at "<<current_state_->pc_<<std::endl;
-      // std::cout<<"ans: "<<(current_state_->register_file_.registers[10].value & 255U)<<'\n';
-      return current_state_->register_file_.registers[10].value & 255U;
+      Flush();
+      if (current_state_->stop_) {
+        return current_state_->register_file_.registers[10].value & 255U;
+      }
+      for (int i = 0; i <= 5; ++i) {
+        units_[i]->Execute(current_state_, next_state_);
+      }
     }
-    for (int i = 0; i <= 5; ++i) {
-      units_[i]->Execute(current_state_, next_state_);
-    }
-  }
-  }catch(const char* msg){
-    std::cerr<<msg<<std::endl;
+  } catch (const char *msg) {
+    std::cerr << msg << std::endl;
     return -1;
   }
 }
@@ -68,8 +54,8 @@ void Simulator::Flush() {
     for (int i = 0; i < 32; ++i) {
       current_state_->register_file_.registers[i].dependency = -1;
     }
-    next_state_->help=0;
-    current_state_->stall_=false;
+    next_state_->help = 0;
+    current_state_->stall_ = false;
   }
   for (int i = 0; i <= 5; ++i) {
     units_[i]->Flush(current_state_);
@@ -79,6 +65,6 @@ void Simulator::Flush() {
   next_state_->pc_ = current_state_->pc_;
   next_state_->register_file_ = current_state_->register_file_;
   next_state_->stall_ = current_state_->stall_;
-  next_state_->help=current_state_->help;
+  next_state_->help = current_state_->help;
 }
 } // namespace Czar

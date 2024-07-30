@@ -10,12 +10,8 @@ set(UNIT_SOURCE_CPPS
   unit/reservation_station.cpp
 )
 
-set(STORAGE_SOURCE_CPPS
-  storage/memory.cpp
-)
-
 set(UTILS_SOURCE_CPPS
   utils/utils.cpp
 )
 
-add_library(simulator ${UNIT_SOURCE_CPPS} ${STORAGE_SOURCE_CPPS} ${UTILS_SOURCE_CPPS} simulator.cpp)
+add_library(simulator ${UNIT_SOURCE_CPPS} ${UTILS_SOURCE_CPPS} simulator.cpp)

@@ -20,7 +20,6 @@ void ReorderBuffer::CDB() {
   }
 }
 void ReorderBuffer::Flush(State *current_state) {
-  // std::cerr<<"ReorderBuffer::Flush\n";
   if (current_state->clean_) {
     rob_info.clean();
     current_state->rob_full_ = false;
@@ -49,8 +48,6 @@ void ReorderBuffer::Flush(State *current_state) {
 
 void ReorderBuffer::Execute(State *current_state, State *next_state) {
   RobInfo &info = rob_info.front();
-  // std::cerr << info.rob_pos_ << '\n';
-  // std::cerr << rob_info.head() << "/" << rob_info.tail() << '\n';
   if (rob_info.empty()) {
     return;
   }
@@ -77,19 +74,11 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
     if (info.state_ == RobState::WRITE) {
       if (info.ins_.op_type_ == OpType::STORE) {
         int reg_pos = info.ins_.rs2_;
-        // if (current_state->register_file_.registers[reg_pos].dependency !=
-        //     info.rob_pos_) {
-        //   throw("invalid: ready to store but register has other dependency");
-        // }
         info.sv_ = current_state->register_file_.registers[reg_pos].value;
       }
       //数据传输给LSB
       next_state->rob_lsb_wire = std::make_pair(true, info);
       info.state_ = RobState::LSPREP;
-      // std::cerr<<rob_info.front().rob_pos_<<'\n';
-      // if(rob_info.front().state_!=RobState::LSPREP){
-      //   throw("invalid state in rob execute");
-      // }
     } else if (info.state_ == RobState::COMMIT) {
       Commit(current_state, next_state, info);
       rob_info.pop();
@@ -100,7 +89,6 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
     rob_info.pop();
     return;
   } else if (info.state_ == RobState::ISSUE) {
-    // std::cerr << info.rob_pos_ << " not commit yet\n";
     return;
   } else {
     if (info.state_ == RobState::COMMIT) {
@@ -112,29 +100,7 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
 
 void ReorderBuffer::Commit(State *current_state, State *next_state,
                            RobInfo &info) {
-  // if(info.ins_.ins_addr_==4100){
-  //   std::cerr<<"commit 4100\n";
-  // }
-  // if(info.ins_.ins_addr_>=4236){
-  //   std::cerr<<"commit >=4236\n";
-  // }
-  // if(info.ins_.op_type_==OpType::BRANCH){
-  //   std::cerr<<"commit branch\n";
-  // }
-  // if (info.ins_.ins_addr_ == 4100) {
-  //   std::cerr << "at 4100\n";
-  // }
-  // if (info.ins_.ins_addr_ == 4112) {
-  //   std::cerr << "at 4112\n";
-  // }
-  // if (info.ins_.ins_addr_ == 4296) {
-  //   std::cerr << "sw A at 4296\n";
-  // }
-  // if (info.ins_.ins_addr_ == 4304) {
-  //   std::cerr << "sw b at 4304\n";
-  // }
   InsType &ins_ = info.ins_;
-  // std::cerr << "ALU: " << info.rob_pos_ << ' ' << info.value_ << '\n';
   cd_bus_->info.push({BusType::WriteBack, info.rob_pos_, info.value_});
   if (ins_.op_type_ == OpType::STORE) {
     return;

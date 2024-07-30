@@ -1,8 +1,8 @@
 #ifndef LOAD_STORE_BUFFER_H
 #define LOAD_STORE_BUFFER_H
-// #include "../simulator.h"
 #include "base_unit.h"
 #include "storage/bus.h"
+
 namespace Czar {
 class load_store_buffer : public BaseUnit {
 public:

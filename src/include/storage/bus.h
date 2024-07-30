@@ -1,12 +1,11 @@
 #ifndef BUS_H
 #define BUS_H
 
+#include "component/array.h"
 #include <utility>
 #include <vector>
-#include "component/array.h"
 
-namespace Czar
-{ 
+namespace Czar {
 
 enum BusType {
   WriteBack,
@@ -20,7 +19,7 @@ enum BusType {
 
 struct BusInfo {
   BusType type_;
-  int pos_;//rob_pos for cd_bus, ram_pos for mem_bus
+  int pos_; // rob_pos for cd_bus, ram_pos for mem_bus
   int data_;
 };
 
@@ -30,6 +29,6 @@ struct Bus {
   // std::pair<bool,BusInfo> info[32];
 };
 
-}  // namespace conless
+} // namespace Czar
 
 #endif
