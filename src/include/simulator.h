@@ -5,6 +5,7 @@
 #include "unit/register_file.h"
 #include "unit/reorder_buffer.h"
 #include "unit/reservation_station.h"
+#include "unit/predictor.h"
 
 namespace Czar {
 // namespace Czar
@@ -42,6 +43,7 @@ class Simulator {
 
 public:
   Simulator();
+  ~Simulator();
   void Init(AddrType pc);
   int Run();
 
@@ -52,6 +54,7 @@ private:
   int clock_{0};
   Bus *cd_bus_, *mem_bus_;
   BaseUnit *units_[6];
+  Predictor *predictor_;
   State *current_state_, *next_state_;
 };
 } // namespace Czar

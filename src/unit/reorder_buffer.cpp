@@ -60,6 +60,7 @@ void ReorderBuffer::Execute(State *current_state, State *next_state) {
     return;
   }
   if (info.ins_.op_type_ == OpType::BRANCH) {
+    predictor_->step(info.ins_.ins_addr_,info.value_);
     if (info.rd_ != info.value_) {
       // std::cerr << "wrong predict, make it right next time!\n";
       next_state->clean_ = true;

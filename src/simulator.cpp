@@ -6,12 +6,23 @@ Simulator::Simulator() {
   mem_bus_ = new Bus(4);
   current_state_ = new State;
   next_state_ = new State;
+  predictor_ = new Predictor();
   units_[0] = new MemoryUnit(mem_bus_);
-  units_[1] = new InstructionUnit();
+  units_[1] = new InstructionUnit(predictor_);
   units_[2] = new ReservationStation(cd_bus_);
   units_[3] = new ArithmeticLogicUnit(cd_bus_);
-  units_[4] = new ReorderBuffer(cd_bus_);
+  units_[4] = new ReorderBuffer(cd_bus_,predictor_);
   units_[5] = new load_store_buffer(mem_bus_);
+}
+Simulator::~Simulator() {
+  delete cd_bus_;
+  delete mem_bus_;
+  delete current_state_;
+  delete next_state_;
+  delete predictor_;
+  for (int i = 0; i <= 5; ++i) {
+    delete units_[i];
+  }
 }
 void Simulator::Init(AddrType pc) {
   current_state_ = nullptr;
@@ -23,6 +34,8 @@ int Simulator::Run() {
     while (true) {
       Flush();
       if (current_state_->stop_) {
+        // std::cout<<"total clock: "<<clock_<<std::endl;
+        // predictor_->get_match_rate();
         return current_state_->register_file_.registers[10].value & 255U;
       }
       for (int i = 0; i <= 5; ++i) {

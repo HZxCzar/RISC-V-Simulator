@@ -5,7 +5,7 @@ set(UNIT_SOURCE_CPPS
   unit/instruction_unit.cpp
   unit/load_store_buffer.cpp
   unit/memory_unit.cpp
-  # unit/predict_unit.cpp
+  unit/predictor.cpp
   unit/reorder_buffer.cpp
   unit/reservation_station.cpp
 )

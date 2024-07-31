@@ -1,6 +1,7 @@
 #include "unit/instruction_unit.h"
 // #include "../include/info/op_type.h"
 #include "simulator.h"
+#include "unit/predictor.h"
 #include "utils/utils.h"
 
 namespace Czar {
@@ -217,9 +218,8 @@ void InstructionUnit::FetchDecode(State *current_state, State *next_state,
   Decode(input_ins, ins);
   if (ins.op_type_ == OpType::BRANCH) {
     // predict
-    bool flag = true;
-    ins.rd_ = 1;
-    if (flag) {
+    ins.rd_ = predictor_->GetPridictor(ins.ins_addr_);
+    if (ins.rd_) {
       next_state->pc_ = current_state->pc_ + ins.imm_;
     } else {
       next_state->pc_ = current_state->pc_ + 4;
