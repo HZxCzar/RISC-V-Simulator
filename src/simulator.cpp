@@ -11,7 +11,7 @@ Simulator::Simulator() {
   units_[1] = new InstructionUnit(predictor_);
   units_[2] = new ReservationStation(cd_bus_);
   units_[3] = new ArithmeticLogicUnit(cd_bus_);
-  units_[4] = new ReorderBuffer(cd_bus_,predictor_);
+  units_[4] = new ReorderBuffer(cd_bus_, predictor_);
   units_[5] = new load_store_buffer(mem_bus_);
 }
 Simulator::~Simulator() {
@@ -36,6 +36,7 @@ int Simulator::Run() {
       if (current_state_->stop_) {
         // std::cout<<"total clock: "<<clock_<<std::endl;
         // predictor_->get_match_rate();
+        // std::cout << "total clock number: " << clock_ << std::endl;
         return current_state_->register_file_.registers[10].value & 255U;
       }
       for (int i = 0; i <= 5; ++i) {
